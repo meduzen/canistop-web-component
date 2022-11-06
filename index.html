@@ -34,6 +34,9 @@
 
         customElements.whenDefined('canistop-something').then(elClass => {
             console.log(cisWc.isFetching)
+
+            // test callbacks 👇
+
             // setTimeout(() => cisWc.remove(), 2000)
             // setInterval(() => cisWc.setAttribute('network-cache', Math.random() >= 0.5), 1500)
             setTimeout(() => cisWc.setAttribute('browser', 'firefox-105'), 1500)
