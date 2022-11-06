@@ -1,74 +1,137 @@
-class CanIStop extends HTMLElement {
-    #fetching = false
-    #$dataWrapper
+const template = `
+  <style>
+      * { color: green; }
+      .slot-outside-style { color: blue; }
 
-    constructor() {
-        super()
+      ::slotted(.slot-outside-style) {
+          color: pink;
+      }
+  </style>
+  <div id="data-wrapper">something</div>
+  <slot>inner slot content</slot>
+  <button id="refresh" type="button">refresh</button>
+  <div>data: <a href="https://canistop.net">canistop.net</a></div>
+`
 
-        this.attachShadow({
-            mode: 'open',
-            // delegatesFocus: true,
-            // slotAssignment: 'manual',
-        })
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                * { color: green; }
-            </style>
-            <slot>default slot content</slot>
-        `
-    }
-
-    connectedCallback() {
-        this.#fetch()
-
-        this.#$dataWrapper = document.createElement('div')
-        this.shadowRoot.appendChild(this.#$dataWrapper)
-
-        const refreshButton = document.createElement('button')
-        refreshButton.type = 'button'
-        refreshButton.textContent = this.getAttribute('refresh-button') || 'refresh'
-        refreshButton.addEventListener('click', this.#fetch.bind(this))
-        this.shadowRoot.appendChild(refreshButton)
-
-        const footer = document.createElement('div')
-        footer.innerHTML = `data: <a href="https://canistop.net">canistop.net</a>`
-        this.shadowRoot.appendChild(footer)
-    }
-
-    // disconnectedCallback() {
-    //     console.log('canistop disconnectedCallback')
-    // }
-
-    // attributeChangedCallback() {
-    //     console.log('canistop attributeChangedCallback')
-    // }
-
-    #fetch() {
-        if (this.#fetching) { return }
-
-        const browser = this.getAttribute('browser')
-        this.#fetching = true
-        fetch(`https://canistop.net/storage/data/${browser}.json`)
-            .then(data => data.json())
-            .then(data => {
-                var regions =
-                    (this.getAttribute('regions'))?.split(',')
-                    ?? Object.keys(data.usage)
-
-                const usage = regions
-                    .map(region => `<li>${region}: ${data.usage[region] * 100}%</li>`)
-                    .join('')
-
-                this.#$dataWrapper.innerHTML = `
-                    <h2>${data.browser} ${data.version} in ${data.date}</h2>
-                    <ul>${usage}</ul>
-                `
-            })
-            // Should we kill the whole component, including its surrounding DOM?
-            .catch(err => console.error(err))
-            .finally(() => this.#fetching = false)
-    }
+const round = (number, precision = 0) => {
+  precision = 10 ** precision
+  return Math.round(number * precision) / precision
 }
 
-customElements.define('canistop-something', CanIStop)
+class CanIStopElement extends HTMLElement {
+
+  // Network
+
+  #fetching = false
+
+  /**
+   * @type {RequestInit}
+   */
+  #fetchOptions = {
+    cache: 'reload', // https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
+  }
+
+  get isFetching() {
+    return this.#fetching
+  }
+
+  // DOM
+
+  #$dataWrapper
+  #$refreshBtn
+
+  constructor() {
+    super()
+
+    const root = this.attachShadow({
+      mode: 'open',
+      // delegatesFocus: true,
+      // slotAssignment: 'manual',
+    })
+
+    root.innerHTML = template
+    this.#$dataWrapper = root.getElementById('data-wrapper')
+    this.#$refreshBtn = root.getElementById('refresh')
+    this.#$refreshBtn.addEventListener('click', this.#fetch.bind(this))
+  }
+
+  // Lifecycle
+
+  connectedCallback() {
+
+    // handle `network-cache` attribute
+
+    this.#setCacheModeFromAttr(this.getAttribute('network-cache'))
+
+    this.#fetch()
+
+    // handle `refresh-label` attribute
+
+    const label = this.getAttribute('refresh-label')
+    if (label) {
+      this.#$refreshBtn.innerHTML = label
+    }
+  }
+
+  disconnectedCallback() {
+    // should cancel a pending request?
+    console.log('canistop disconnectedCallback')
+  }
+
+  static get observedAttributes() {
+    return ['network-cache', 'browser', 'regions']
+  }
+
+  attributeChangedCallback(name, oldVal, newVal) {
+    if (name == 'network-cache') {
+      return this.#setCacheModeFromAttr(newVal)
+    }
+
+    if (name == 'browser' || name == 'regions') {
+      return this.#fetch(true) // @todo: the `force` parameter should cancel any pending request
+    }
+  }
+
+  // Methods
+
+  // handle `network-cache` attribute
+  #setCacheModeFromAttr(value) {
+    this.#fetchOptions.cache = value === 'false' ? 'reload' : 'default'
+  }
+
+  update() {
+    this.#fetch()
+  }
+
+  // Should it return something?
+  #fetch(force = false) {
+    if (this.#fetching && !force) { return }
+
+    const browser = this.getAttribute('browser')
+    this.#fetching = true
+
+    fetch(`https://canistop.net/storage/data/${browser}.json`, this.#fetchOptions)
+      .then(data => data.json())
+      .then(data => {
+        const regions = this.getAttribute('regions')?.split(',') ?? Object.keys(data.usage)
+
+        const usage = regions
+          .map(region =>
+              `<li>${region}: ${round(data.usage[region], 2).toFixed(2)}%</li>`
+          )
+          .join('')
+
+        this.#$dataWrapper.innerHTML = `
+          <h2>${data.browser} ${data.version} usage in ${data.date}</h2>
+          <ul>${usage}</ul>
+        `
+
+        this.dispatchEvent(new Event('canistop:updated'))
+      })
+      // @todo: consider showing an error status
+      .catch((err) => console.error(err))
+      .finally(() => (this.#fetching = false))
+  }
+}
+
+customElements.define('canistop-something', CanIStopElement)

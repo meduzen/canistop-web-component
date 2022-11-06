@@ -3,11 +3,42 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="supported-color-schemes" content="dark light only"> <!-- macOS 10.14.4 compat -->
+    <meta name="color-scheme" content="dark light only">
     <title>Can I Stop web component</title>
-    <script src="canistop-wc.js"></script>
+    <script src="canistop-wc.js" defer></script>
+    <style>
+        .slot-outside-style {
+            /* color: orange; */
+        }
+    </style>
 </head>
 <body>
     <h1>Can I Stop Web Component demo</h1>
-    <canistop-something refresh-button="fetch again" browser="ie-11" regions="alt-ww,be,fr,jp" cache="true">content for the slot</canistop-something>
+    <canistop-something
+        browser="ie-11"
+        regions="alt-ww,be,fr,jp"
+        network-cache="false"
+        refresh-label="fetch again"
+    >
+        <span class="slot-outside-style">outside content put in slot</span>
+    </canistop-something>
+
+    <script>
+        const cisWc = document.querySelector('canistop-something')
+        console.log(cisWc)
+
+        cisWc.addEventListener('canistop:updated', e => {
+            console.log('data updated, wouhou!')
+        })
+
+        customElements.whenDefined('canistop-something').then(elClass => {
+            console.log(cisWc.isFetching)
+            // setTimeout(() => cisWc.remove(), 2000)
+            // setInterval(() => cisWc.setAttribute('network-cache', Math.random() >= 0.5), 1500)
+            setTimeout(() => cisWc.setAttribute('browser', 'firefox-105'), 1500)
+            setTimeout(() => cisWc.setAttribute('browser', 'chrome-107'), 3500)
+        })
+    </script>
 </body>
 </html>
