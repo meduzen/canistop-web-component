@@ -31,6 +31,13 @@ const round = (number, precision = 0) => {
   return Math.round(number * precision) / precision
 }
 
+/**
+ * Sort a coma-separated list while removing duplicates.
+ * @param {string} str Coma-separated list
+ * @returns {(string | any)}
+ */
+const sortComaSeparated = str => [...new Set(str?.split(','))].sort().join(',') || str
+
 class CanIStopElement extends HTMLElement {
 
   // Network
@@ -126,7 +133,7 @@ class CanIStopElement extends HTMLElement {
     fetch(`https://canistop.net/storage/data/${browser}.json`, this.#fetchOptions)
       .then(data => data.json())
       .then(data => {
-        const regions = this.getAttribute('regions')?.split(',') ?? Object.keys(data.usage)
+        const regions = sortComaSeparated(this.getAttribute('regions'))?.split(',') ?? Object.keys(data.usage)
 
         const usage = regions
           .map(region =>
