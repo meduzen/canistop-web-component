@@ -8,20 +8,27 @@
     <title>Can I Stop web component</title>
     <script src="canistop-wc.js" defer></script>
     <style>
+        html {
+            --canistop-primary-light: red;
+            --canistop-primary-dark: cyan;
+            --canistop-primary: green;
+        }
+
         .slot-outside-style {
-            /* color: orange; */
+            /* background-color: orange; */
         }
     </style>
 </head>
 <body>
     <h1>Can I Stop Web Component demo</h1>
     <canistop-something
+        class="big"
         browser="ie-11"
         regions="alt-ww,be,fr,jp"
         network-cache="false"
         refresh-label="fetch again"
     >
-        <span class="slot-outside-style">outside content put in slot</span>
+        <span class="slot-outside-style">outside <em>emphasis</em> content put in slot</span>
     </canistop-something>
 
     <script>

@@ -1,10 +1,23 @@
 const template = `
   <style>
-      * { color: green; }
-      .slot-outside-style { color: blue; }
+      :host {
+        color: var(--canistop-primary-light, var(--canistop-primary, inherit));
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :host {
+          color: var(--canistop-primary-dark, var(--canistop-primary, inherit));
+        }
+      }
+
+      :host(.big) {
+        font-size: 130%;
+      }
+
+      .slot-outside-style { background-color: gray; }
 
       ::slotted(.slot-outside-style) {
-          color: pink;
+        background-color: olive;
       }
   </style>
   <div id="data-wrapper">something</div>
