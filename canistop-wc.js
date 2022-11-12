@@ -65,7 +65,6 @@ class CanIStopElement extends HTMLElement {
 
     const root = this.attachShadow({
       mode: 'open',
-      // delegatesFocus: true,
       // slotAssignment: 'manual',
     })
 
@@ -107,8 +106,12 @@ class CanIStopElement extends HTMLElement {
       return this.#setCacheModeFromAttr(newVal)
     }
 
-    if (name == 'browser' || name == 'regions') {
-      return this.#fetch(true) // @todo: the `force` parameter should cancel any pending request
+    // `browser` or `regions` attribute, and value has changed
+    if (
+      (name == 'browser' && newVal != oldVal)
+      || (name == 'regions' && sortComaSeparated(oldVal) != sortComaSeparated(newVal))
+    ) {
+      return this.#fetch(true)
     }
   }
 
@@ -124,7 +127,7 @@ class CanIStopElement extends HTMLElement {
   }
 
   // Should it return something?
-  #fetch(force = false) {
+  #fetch(force = false) { // @todo: the `force` parameter should cancel any pending request
     if (this.#fetching && !force) { return }
 
     const browser = this.getAttribute('browser')
