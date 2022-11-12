@@ -40,8 +40,8 @@ See `index.html`.
 (Yes, the component name is temporary.)
 
 - `browser`: browser name and version, as shown in canistop.net URL bar;
-- `regions` (default: all regions): regions, as shown in canistop.net URL bar;
-- `network-cache` (default: `true`): when true, always bypass browser network cache by using [`cache: 'reload'`](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache#value);
+- `regions` (default: all regions): coma-separated regions codes, as shown in canistop.net;
+- `network-cache` (default: `true`): when true, always bypass browser network cache (using [`cache: 'reload'`](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache#value));
 - `refresh-label` (default: “fetch again”): the label of the “refresh” button.
 
 ## Resources
@@ -54,3 +54,5 @@ See `index.html`.
  - https://developer.mozilla.org/en-US/docs/Web/CSS/::slotted
  - https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#libraries
  - https://developer.mozilla.org/en-US/docs/Web/Web_Components
+ - https://web.dev/custom-elements-v1/
+ - https://web.dev/shadowdom-v1/
