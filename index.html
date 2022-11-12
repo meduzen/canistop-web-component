@@ -6,36 +6,63 @@
     <meta name="supported-color-schemes" content="dark light only"> <!-- macOS 10.14.4 compat -->
     <meta name="color-scheme" content="dark light only">
     <title>Can I Stop web component</title>
+    <link rel="stylesheet" href="https://canistop.net/css/app.css">
     <script src="canistop-wc.js" defer></script>
     <style>
-        html {
+        /* html {
             --canistop-primary-light: red;
             --canistop-primary-dark: cyan;
             --canistop-primary: green;
+        } */
+
+        /* .slot-outside-style { */
+            /* background-color: orange; */
+        /* } */
+
+        .wrapper {
+            margin: 1rem;
+            padding: 1rem;
+            border: .2rem solid orange;
+            border-radius: .3rem;
         }
 
-        .slot-outside-style {
-            /* background-color: orange; */
+        .wrapper--50p {
+            width: 50%;
         }
     </style>
 </head>
 <body>
-    <h1>Can I Stop Web Component demo</h1>
-    <canistop-something
-        class="big"
-        browser="ie-11"
-        regions="alt-ww,be,fr,jp"
-        network-cache="false"
-        refresh-label="fetch again"
-    >
-        <span class="slot-outside-style">outside <em>emphasis</em> content put in slot</span>
-    </canistop-something>
+    <h1>Can I Stop Web component tentative</h1>
+
+    <div class="wrapper">
+        <h2>Component at use in full width wrapper</h2>
+        <canistop-something
+            class="big"
+            browser="ie-11"
+            regions="alt-ww,be,fr,jp"
+            network-cache="false"
+            refresh-label="fetch again"
+        >
+            <span class="slot-outside-style">outside <em>emphasis</em> content put in slot</span>
+        </canistop-something>
+    </div>
+
+    <div class="wrapper wrapper--50p">
+        <h2>Component at use in half-width wrapper</h2>
+        <canistop-something
+            browser="samsung-18.0"
+            regions="alt-eu,kr,us"
+        >
+            <span class="slot-outside-style">outside <em>emphasis</em> content put in slot</span>
+        </canistop-something>
+    </div>
 
     <script>
         const cisWc = document.querySelector('canistop-something')
         console.log(cisWc)
 
         cisWc.addEventListener('canistop:updated', e => {
+            // could pulse component wrapper on data update
             console.log('data updated, wouhou!')
         })
 
